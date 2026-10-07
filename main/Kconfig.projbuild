@@ -33,6 +33,18 @@ endchoice
 
 endmenu
 
+config APP_REMOTE_DISPLAY
+    bool "Browser live display and remote touch (development)"
+    depends on APP_PANEL_VARIANT_S3_480
+    default y
+    select HTTPD_WS_SUPPORT
+    select HTTPD_WS_PRE_HANDSHAKE_CB_SUPPORT
+    select HTTPD_WS_POST_HANDSHAKE_CB_SUPPORT
+    help
+        Mirror the existing RGB565 full-refresh display to the web editor.
+        Allocates capture buffers only while a viewer is connected. Disable
+        for production builds that should not expose remote display control.
+
 menu "Wi-Fi Station"
 
 config APP_WIFI_SSID
@@ -148,10 +160,10 @@ config APP_NTP_SERVER
         NTP server used for time synchronization.
 
 config APP_TIME_TZ
-    string "Timezone (POSIX TZ)"
-    default "CET-1CEST,M3.5.0/2,M10.5.0/3"
+    string "Timezone (Region/City)"
+    default "Europe/Berlin"
     help
-        POSIX timezone string used for localtime conversion.
+        Timezone name from net/tzdb/zones.json. Legacy POSIX rules are also supported.
         Default is Europe/Berlin with automatic DST switching.
 
 endmenu

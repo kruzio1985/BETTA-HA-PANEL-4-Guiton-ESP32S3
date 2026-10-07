@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "cJSON.h"
 #include "esp_heap_caps.h"
@@ -21,6 +22,7 @@
 #include "ha/ha_client.h"
 #include "mqtt/panel_mqtt.h"
 #include "net/wifi_mgr.h"
+#include "net/time_sync.h"
 #include "settings/i18n_store.h"
 #include "settings/runtime_settings.h"
 #include "ui/ui_page_transition.h"
@@ -213,8 +215,37 @@ static void schedule_restart(void)
     }
 }
 
+static void add_clock_status(cJSON *obj)
+{
+    time_t now = time(NULL);
+    struct tm local = {0};
+    char local_time[32] = {0};
+    bool valid = localtime_r(&now, &local) != NULL && local.tm_year > (2016 - 1900);
+    if (valid) strftime(local_time, sizeof(local_time), "%Y-%m-%dT%H:%M:%S", &local);
+    cJSON_AddStringToObject(obj, "active_timezone", time_sync_get_tz());
+    cJSON_AddBoolToObject(obj, "clock_valid", valid);
+    cJSON_AddStringToObject(obj, "local_time", local_time);
+}
+
 esp_err_t api_settings_get_handler(httpd_req_t *req)
 {
+    /* Small polling response: no settings file read or timezone list allocation. */
+    char query[48] = {0};
+    char clock_only[4] = {0};
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK &&
+        httpd_query_key_value(query, "time_only", clock_only, sizeof(clock_only)) == ESP_OK &&
+        strcmp(clock_only, "1") == 0) {
+        cJSON *clock = cJSON_CreateObject();
+        if (clock == NULL) return httpd_resp_send_500(req);
+        add_clock_status(clock);
+        char *payload = cJSON_PrintUnformatted(clock);
+        cJSON_Delete(clock);
+        if (payload == NULL) return httpd_resp_send_500(req);
+        set_json_headers(req);
+        esp_err_t err = httpd_resp_sendstr(req, payload);
+        cJSON_free(payload);
+        return err;
+    }
     runtime_settings_t *settings = calloc(1, sizeof(runtime_settings_t));
     if (settings == NULL) {
         return httpd_resp_send_500(req);
@@ -293,6 +324,11 @@ esp_err_t api_settings_get_handler(httpd_req_t *req)
 
     cJSON_AddStringToObject(time_cfg, "ntp_server", settings->ntp_server);
     cJSON_AddStringToObject(time_cfg, "timezone", settings->time_tz);
+    add_clock_status(time_cfg);
+    cJSON *zones = cJSON_AddArrayToObject(time_cfg, "timezones");
+    for (size_t i = 0; zones != NULL && time_sync_tz_name(i) != NULL; ++i) {
+        cJSON_AddItemToArray(zones, cJSON_CreateString(time_sync_tz_name(i)));
+    }
     cJSON_AddItemToObject(root, "time", time_cfg);
 
     cJSON_AddStringToObject(ui, "language", settings->ui_language);
@@ -492,6 +528,9 @@ esp_err_t api_settings_put_handler(httpd_req_t *req)
     if (load_err != ESP_OK) {
         runtime_settings_set_defaults(settings);
     }
+
+    char previous_timezone[APP_TIME_TZ_MAX_LEN];
+    strlcpy(previous_timezone, settings->time_tz, sizeof(previous_timezone));
 
     cJSON *wifi = cJSON_GetObjectItemCaseSensitive(root, "wifi");
     cJSON *ha = cJSON_GetObjectItemCaseSensitive(root, "ha");
@@ -956,8 +995,10 @@ esp_err_t api_settings_put_handler(httpd_req_t *req)
     if (settings->ntp_server[0] == '\0') {
         strlcpy(settings->ntp_server, APP_NTP_SERVER, sizeof(settings->ntp_server));
     }
-    if (settings->time_tz[0] == '\0') {
-        strlcpy(settings->time_tz, APP_TIME_TZ, sizeof(settings->time_tz));
+    if (strcmp(settings->time_tz, previous_timezone) != 0 &&
+        time_sync_tz_rules(settings->time_tz) == NULL) {
+        free(settings);
+        return send_json_error(req, "400 Bad Request", "Unknown timezone; select a supported name such as Africa/Ceuta");
     }
     if (!normalize_ui_language(settings->ui_language, sizeof(settings->ui_language))) {
         free(settings);
@@ -1004,6 +1045,12 @@ esp_err_t api_settings_put_handler(httpd_req_t *req)
     }
 
     esp_err_t save_err = runtime_settings_save(settings);
+    if (save_err == ESP_OK && !reboot && strcmp(settings->time_tz, previous_timezone) != 0) {
+        if (time_sync_set_tz(settings->time_tz) != ESP_OK) {
+            free(settings);
+            return send_json_error(req, "500 Internal Server Error", "Timezone saved but could not be applied; reboot to retry");
+        }
+    }
     if (save_err == ESP_OK && !reboot) {
         /* Apply display settings immediately without a reboot. */
         ui_screen_saver_apply_settings(settings);

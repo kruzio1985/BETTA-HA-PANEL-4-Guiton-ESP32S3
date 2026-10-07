@@ -8,8 +8,12 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <sys/stat.h>
+
+extern const uint8_t i18n_zh_cn_json_start[] asm("_binary_i18n_zh_cn_json_start");
+extern const uint8_t i18n_zh_tw_json_start[] asm("_binary_i18n_zh_tw_json_start");
 
 static const char *I18N_BUILTIN_DE =
     "{\"lvgl\":{"
@@ -22,7 +26,7 @@ static const char *I18N_BUILTIN_DE =
     "\"graph\":{\"no_history\":\"keine Historie\",\"no_data\":\"keine Daten\",\"min\":\"min\",\"max\":\"max\"},"
     "\"energy\":{\"title\":\"Energie\",\"waiting\":\"Warte auf Energiedaten\",\"ha_waiting\":\"HA Energy Daten\",\"today\":\"Heute\",\"grid\":\"Netz\",\"solar\":\"Solar\",\"home\":\"Zuhause\",\"battery\":\"Batterie\",\"grid_in\":\"Bezug\",\"grid_out\":\"Einspeisung\",\"battery_charge\":\"Laden\",\"battery_out\":\"Entladen\",\"home_now\":\"Haus jetzt\"},"
     "\"boot\":{\"initializing_system\":\"System wird initialisiert\",\"initializing_wifi\":\"WLAN wird initialisiert\",\"initializing_touch\":\"Touch wird initialisiert\",\"wifi_setup_title\":\"WLAN Setup\",\"wifi_connect_failed\":\"WLAN Verbindung fehlgeschlagen\",\"wifi_credentials_missing\":\"WLAN Zugangsdaten fehlen\",\"open_editor\":\"BETTA Editor oeffnen:\",\"ha_setup_title\":\"Home Assistant Setup\",\"wifi_connected\":\"WLAN verbunden\",\"ha_credentials_missing\":\"HA Zugangsdaten fehlen\",\"set_ha_url_token\":\"HA URL und Token setzen\",\"loading_dashboard\":\"Dashboard wird geladen\",\"mounting_sd\":\"microSD-Karte wird eingebunden\",\"setup_ap_prefix\":\"Setup AP\",\"offline_mode\":\"Offline Modus\"},"
-    "\"screen\":{\"title\":\"Bildschirmeinstellungen\",\"brightness\":\"Helligkeit\",\"saver_brightness\":\"Uhrhelligkeit\",\"screensaver\":\"Bildschirmschoner\",\"screen_off\":\"Bildschirm aus\",\"clock_24h\":\"24h Uhr\",\"show_seconds\":\"Sekunden\",\"show_date\":\"Datum\"}"
+    "\"screen\":{\"title\":\"Bildschirmeinstellungen\",\"brightness\":\"Helligkeit\",\"saver_brightness\":\"Uhrhelligkeit\",\"screensaver\":\"Bildschirmschoner\",\"screen_off\":\"Bildschirm aus\",\"clock_24h\":\"24h Uhr\",\"show_seconds\":\"Sekunden\",\"show_date\":\"Datum\",\"description\":\"Anzeige und Energie einstellen\",\"brightness_description\":\"Bildschirmhelligkeit einstellen\",\"screensaver_description\":\"Bildschirmschoner starten nach\",\"saver_brightness_description\":\"Uhrhelligkeit einstellen\",\"screen_off_description\":\"Bildschirm ausschalten nach\",\"clock_24h_description\":\"24-Stunden-Format verwenden\",\"show_seconds_description\":\"Sekunden auf der Uhr anzeigen\",\"show_date_description\":\"Datum auf dem Bildschirm anzeigen\"}"
     "}}";
 
 static const char *I18N_BUILTIN_EN =
@@ -42,7 +46,7 @@ static const char *I18N_BUILTIN_EN =
     "\"scene\":{\"hint\":\"Tap to run\",\"running\":\"Running...\",\"done\":\"Done\",\"failed\":\"Command failed\"},"
     "\"person\":{\"home\":\"Home\",\"away\":\"Away\"},"
     "\"timer\":{\"status_idle\":\"Idle\",\"status_active\":\"Running\",\"status_paused\":\"Paused\",\"status_done\":\"Done\",\"status_sending\":\"Sending...\",\"status_failed\":\"Command failed\",\"btn_start\":\"Start\",\"btn_pause\":\"Pause\",\"btn_resume\":\"Resume\",\"btn_cancel\":\"Cancel\",\"btn_reset\":\"Reset\",\"btn_min1\":\"1 min\",\"btn_min5\":\"5 min\",\"btn_min10\":\"10 min\"},"
-    "\"screen\":{\"title\":\"Screen settings\",\"brightness\":\"Brightness\",\"saver_brightness\":\"Clock brightness\",\"screensaver\":\"Screensaver\",\"screen_off\":\"Screen off\",\"clock_24h\":\"24h clock\",\"show_seconds\":\"Seconds\",\"show_date\":\"Date\"}"
+    "\"screen\":{\"title\":\"Screen settings\",\"brightness\":\"Brightness\",\"saver_brightness\":\"Clock brightness\",\"screensaver\":\"Screensaver\",\"screen_off\":\"Screen off\",\"clock_24h\":\"24h clock\",\"show_seconds\":\"Seconds\",\"show_date\":\"Date\",\"description\":\"Adjust display and power settings\",\"brightness_description\":\"Adjust screen brightness\",\"screensaver_description\":\"Turn on screensaver after\",\"saver_brightness_description\":\"Adjust clock display brightness\",\"screen_off_description\":\"Turn off screen after\",\"clock_24h_description\":\"Use 24-hour time format\",\"show_seconds_description\":\"Show seconds in clock\",\"show_date_description\":\"Show date on screen\"}"
     "}}";
 
 static const char *I18N_BUILTIN_ES =
@@ -56,7 +60,7 @@ static const char *I18N_BUILTIN_ES =
     "\"graph\":{\"no_history\":\"sin historial\",\"no_data\":\"sin datos\",\"min\":\"min\",\"max\":\"max\"},"
     "\"energy\":{\"title\":\"Energia\",\"waiting\":\"Esperando datos de energia\",\"ha_waiting\":\"Datos de HA Energy\",\"today\":\"Hoy\",\"grid\":\"Red\",\"solar\":\"Solar\",\"home\":\"Hogar\",\"battery\":\"Bateria\",\"grid_in\":\"entrada\",\"grid_out\":\"salida\",\"battery_charge\":\"carga\",\"battery_out\":\"descarga\",\"home_now\":\"Hogar ahora\"},"
     "\"boot\":{\"initializing_system\":\"Inicializando sistema\",\"initializing_wifi\":\"Inicializando Wi-Fi\",\"initializing_touch\":\"Inicializando tactil\",\"wifi_setup_title\":\"Configuracion Wi-Fi\",\"wifi_connect_failed\":\"Error de conexion Wi-Fi\",\"wifi_credentials_missing\":\"Faltan credenciales Wi-Fi\",\"open_editor\":\"Abrir BETTA Editor:\",\"ha_setup_title\":\"Configuracion Home Assistant\",\"wifi_connected\":\"Wi-Fi conectado\",\"ha_credentials_missing\":\"Faltan credenciales HA\",\"set_ha_url_token\":\"Configurar URL y token de HA\",\"loading_dashboard\":\"Cargando panel\",\"mounting_sd\":\"Montando tarjeta microSD\",\"setup_ap_prefix\":\"AP de configuracion\",\"offline_mode\":\"Modo sin conexion\"},"
-    "\"screen\":{\"title\":\"Ajustes de pantalla\",\"brightness\":\"Brillo\",\"saver_brightness\":\"Brillo del reloj\",\"screensaver\":\"Salvapantallas\",\"screen_off\":\"Apagar pantalla\",\"clock_24h\":\"Reloj 24h\",\"show_seconds\":\"Segundos\",\"show_date\":\"Fecha\"}"
+    "\"screen\":{\"title\":\"Ajustes de pantalla\",\"brightness\":\"Brillo\",\"saver_brightness\":\"Brillo del reloj\",\"screensaver\":\"Salvapantallas\",\"screen_off\":\"Apagar pantalla\",\"clock_24h\":\"Reloj 24h\",\"show_seconds\":\"Segundos\",\"show_date\":\"Fecha\",\"description\":\"Ajustar pantalla y energia\",\"brightness_description\":\"Ajustar brillo de pantalla\",\"screensaver_description\":\"Activar salvapantallas tras\",\"saver_brightness_description\":\"Ajustar brillo del reloj\",\"screen_off_description\":\"Apagar pantalla tras\",\"clock_24h_description\":\"Usar formato de 24 horas\",\"show_seconds_description\":\"Mostrar segundos en el reloj\",\"show_date_description\":\"Mostrar fecha en pantalla\"}"
     "}}";
 
 static const char *I18N_BUILTIN_FR =
@@ -70,7 +74,7 @@ static const char *I18N_BUILTIN_FR =
     "\"graph\":{\"no_history\":\"aucun historique\",\"no_data\":\"aucune donnee\",\"min\":\"min\",\"max\":\"max\"},"
     "\"energy\":{\"title\":\"Energie\",\"waiting\":\"Attente des donnees energie\",\"ha_waiting\":\"Donnees HA Energy\",\"today\":\"Aujourd'hui\",\"grid\":\"Reseau\",\"solar\":\"Solaire\",\"home\":\"Maison\",\"battery\":\"Batterie\",\"grid_in\":\"import\",\"grid_out\":\"export\",\"battery_charge\":\"charge\",\"battery_out\":\"decharge\",\"home_now\":\"Maison maintenant\"},"
     "\"boot\":{\"initializing_system\":\"Initialisation du systeme\",\"initializing_wifi\":\"Initialisation Wi-Fi\",\"initializing_touch\":\"Initialisation tactile\",\"wifi_setup_title\":\"Configuration Wi-Fi\",\"wifi_connect_failed\":\"Echec connexion Wi-Fi\",\"wifi_credentials_missing\":\"Identifiants Wi-Fi manquants\",\"open_editor\":\"Ouvrir BETTA Editor:\",\"ha_setup_title\":\"Configuration Home Assistant\",\"wifi_connected\":\"Wi-Fi connecte\",\"ha_credentials_missing\":\"Identifiants HA manquants\",\"set_ha_url_token\":\"Definir URL HA et token\",\"loading_dashboard\":\"Chargement du tableau de bord\",\"mounting_sd\":\"Montage de la carte microSD\",\"setup_ap_prefix\":\"AP de configuration\",\"offline_mode\":\"Mode hors ligne\"},"
-    "\"screen\":{\"title\":\"Reglages ecran\",\"brightness\":\"Luminosite\",\"saver_brightness\":\"Luminosite horloge\",\"screensaver\":\"Economiseur\",\"screen_off\":\"Ecran eteint\",\"clock_24h\":\"Horloge 24h\",\"show_seconds\":\"Secondes\",\"show_date\":\"Date\"}"
+    "\"screen\":{\"title\":\"Reglages ecran\",\"brightness\":\"Luminosite\",\"saver_brightness\":\"Luminosite horloge\",\"screensaver\":\"Economiseur\",\"screen_off\":\"Ecran eteint\",\"clock_24h\":\"Horloge 24h\",\"show_seconds\":\"Secondes\",\"show_date\":\"Date\",\"description\":\"Regler affichage et energie\",\"brightness_description\":\"Regler la luminosite de l'ecran\",\"screensaver_description\":\"Activer l'economiseur apres\",\"saver_brightness_description\":\"Regler la luminosite de l'horloge\",\"screen_off_description\":\"Eteindre l'ecran apres\",\"clock_24h_description\":\"Utiliser le format 24 heures\",\"show_seconds_description\":\"Afficher les secondes\",\"show_date_description\":\"Afficher la date sur l'ecran\"}"
     "}}";
 
 static const char *I18N_BUILTIN_PL =
@@ -92,7 +96,7 @@ static const char *I18N_BUILTIN_PL =
     "\"scene\":{\"hint\":\"Dotknij, aby uruchomi\u0107\",\"running\":\"Uruchamianie...\",\"done\":\"Gotowe\",\"failed\":\"Polecenie nie powiod\u0142o si\u0119\"},"
     "\"person\":{\"home\":\"Dom\",\"away\":\"Poza domem\"},"
     "\"timer\":{\"status_idle\":\"Bezczynny\",\"status_active\":\"Odliczanie\",\"status_paused\":\"Wstrzymany\",\"status_done\":\"Gotowe\",\"status_sending\":\"Wysy\u0142anie...\",\"status_failed\":\"Polecenie nie powiod\u0142o si\u0119\",\"btn_start\":\"Start\",\"btn_pause\":\"Wstrzymaj\",\"btn_resume\":\"Wzn\u00f3w\",\"btn_cancel\":\"Anuluj\",\"btn_reset\":\"Reset\",\"btn_min1\":\"1 min\",\"btn_min5\":\"5 min\",\"btn_min10\":\"10 min\"},"
-    "\"screen\":{\"title\":\"Ustawienia ekranu\",\"brightness\":\"Jasno\u015b\u0107\",\"saver_brightness\":\"Jasno\u015b\u0107 zegara\",\"screensaver\":\"Wygaszacz\",\"screen_off\":\"Wy\u0142\u0105czenie ekranu\",\"clock_24h\":\"Format 24h\",\"show_seconds\":\"Sekundy\",\"show_date\":\"Data\"}"
+    "\"screen\":{\"title\":\"Ustawienia ekranu\",\"brightness\":\"Jasno\u015b\u0107\",\"saver_brightness\":\"Jasno\u015b\u0107 zegara\",\"screensaver\":\"Wygaszacz\",\"screen_off\":\"Wy\u0142\u0105czenie ekranu\",\"clock_24h\":\"Format 24h\",\"show_seconds\":\"Sekundy\",\"show_date\":\"Data\",\"description\":\"Ustawienia obrazu i zasilania\",\"brightness_description\":\"Dostosuj jasność ekranu\",\"screensaver_description\":\"Włącz wygaszacz po\",\"saver_brightness_description\":\"Dostosuj jasność zegara\",\"screen_off_description\":\"Wyłącz ekran po\",\"clock_24h_description\":\"Używaj formatu 24-godzinnego\",\"show_seconds_description\":\"Pokazuj sekundy na zegarze\",\"show_date_description\":\"Pokazuj datę na ekranie\"}"
     "}}";
 
 static bool i18n_store_is_valid_language_code(const char *code)
@@ -150,7 +154,8 @@ bool i18n_store_is_builtin_language(const char *language_code)
         return false;
     }
     return strcmp(language_code, "de") == 0 || strcmp(language_code, "en") == 0 || strcmp(language_code, "es") == 0 ||
-           strcmp(language_code, "fr") == 0 || strcmp(language_code, "pl") == 0;
+           strcmp(language_code, "fr") == 0 || strcmp(language_code, "pl") == 0 ||
+           strcmp(language_code, "zh-cn") == 0 || strcmp(language_code, "zh-tw") == 0;
 }
 
 const char *i18n_store_builtin_translation_json(const char *language_code)
@@ -172,6 +177,12 @@ const char *i18n_store_builtin_translation_json(const char *language_code)
     }
     if (strcmp(language_code, "pl") == 0) {
         return I18N_BUILTIN_PL;
+    }
+    if (strcmp(language_code, "zh-cn") == 0) {
+        return (const char *)i18n_zh_cn_json_start;
+    }
+    if (strcmp(language_code, "zh-tw") == 0) {
+        return (const char *)i18n_zh_tw_json_start;
     }
     return NULL;
 }
@@ -333,6 +344,8 @@ esp_err_t i18n_store_list_languages(
     (void)i18n_store_add_language(out_codes, max_codes, &count, "es");
     (void)i18n_store_add_language(out_codes, max_codes, &count, "fr");
     (void)i18n_store_add_language(out_codes, max_codes, &count, "pl");
+    (void)i18n_store_add_language(out_codes, max_codes, &count, "zh-cn");
+    (void)i18n_store_add_language(out_codes, max_codes, &count, "zh-tw");
 
     if (!i18n_store_ensure_dir()) {
         *out_count = count;

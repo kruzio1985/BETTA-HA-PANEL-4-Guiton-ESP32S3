@@ -3,6 +3,10 @@
  */
 #pragma once
 
+/* Open the settings overlay with a compact fixed header and content-sized cards.
+ * Only the card viewport scrolls; touching controls does not auto-scroll it.
+ * Card icons and simple-toggle switches stay vertically centered in each card.
+ * Changes apply immediately; the close control saves the runtime settings. */
 void ui_screen_settings_open(void);
 
 /* Must be called by ui_pages_init() before it cleans the active screen: the

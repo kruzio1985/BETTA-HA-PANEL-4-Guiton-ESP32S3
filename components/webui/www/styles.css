@@ -98,6 +98,8 @@ body {
   background: #27435a;
 }
 
+.mode-tabs.has-remote { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
 .btn.tab.active {
   background: var(--accent);
   color: #072031;
@@ -732,6 +734,14 @@ textarea {
   min-height: 0;
   align-items: start;
 }
+
+.remote-pane { grid-column: 1 / -1; min-width: 0; }
+.remote-toolbar { flex-wrap: wrap; align-items: center; }
+.remote-toolbar label { margin: 0; width: auto; }
+.remote-status { display: flex; gap: 16px; margin: 12px 0; }
+.remote-surface { overflow: auto; padding: 12px; background: #0d1826; border: 1px solid #2f4860; }
+#remoteCanvas { display: block; width: min(100%, 640px); height: auto; margin: auto; touch-action: none; user-select: none; }
+#remoteCanvas.actual-size { width: 480px; max-width: none; }
 
 .canvas-wrap {
   background: #0d1826;
@@ -1856,3 +1866,23 @@ aside.actions-panel section {
   padding: 2px;
   cursor: pointer;
 }
+
+/* Searchable timezone picker: independent of browser datalist rendering. */
+.timezone-field, .timezone-clock { display: grid; gap: 6px; }
+.timezone-picker { position: relative; min-width: 0; }
+.timezone-control { display: flex; }
+.timezone-control input { min-width: 0; border-radius: 8px 0 0 8px; }
+.timezone-control button { border-radius: 0 8px 8px 0; min-width: 40px; }
+.timezone-options {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30;
+  max-height: 240px; overflow-y: auto; background: var(--panel);
+  border: 1px solid #30506b; border-radius: 8px; padding: 4px;
+  box-shadow: 0 8px 24px #0008;
+}
+.timezone-options[hidden] { display: none; }
+.timezone-option { padding: 9px 10px; cursor: pointer; overflow-wrap: anywhere; font-size: 13px; }
+.timezone-option:hover, .timezone-option.active { background: var(--panel-2); border-radius: 4px; }
+.timezone-option[aria-selected="true"] { color: var(--accent); }
+.timezone-empty { padding: 12px; color: var(--muted); font-size: 13px; }
+.timezone-clock { margin-top: 10px; color: var(--muted); font-size: 12px; }
+.timezone-clock output { color: var(--text); font-size: 20px; font-variant-numeric: tabular-nums; }

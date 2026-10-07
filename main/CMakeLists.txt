@@ -39,6 +39,8 @@ idf_component_register(
         "api/api_wifi.c"
         "api/api_version.c"
         "api/api_screenshot.c"
+        "api/api_remote_display.c"
+        "ui/ui_remote_display.c"
         "api/api_ota.c"
         "api/api_theme.c"
         "api/api_ha_diagnostics.c"
@@ -103,6 +105,10 @@ idf_component_register(
         "ui/widgets/w_person_tile.c"
         "ui/widgets/w_timer_tile.c"
         "ui/fonts/mdi_font_registry.c"
+        "ui/fonts/app_cjk_14.c"
+        "ui/fonts/app_cjk_20.c"
+        "ui/fonts/app_cjk_22.c"
+        "ui/fonts/app_cjk_28.c"
         "ui/theme/theme_default.c"
         "ui/theme/theme_palette.c"
         "ui/theme/theme_store.c"
@@ -150,6 +156,15 @@ idf_component_register(
         esp_driver_jpeg
         esp_driver_tsens
 )
+
+# Keep generated display catalogs as the single source of truth and embed them
+# directly into firmware for selection before LittleFS custom catalogs exist.
+set(I18N_ZH_CN_EMBED "${CMAKE_CURRENT_BINARY_DIR}/i18n_zh_cn.json")
+set(I18N_ZH_TW_EMBED "${CMAKE_CURRENT_BINARY_DIR}/i18n_zh_tw.json")
+configure_file("${CMAKE_CURRENT_LIST_DIR}/i18n/zh-cn.json" "${I18N_ZH_CN_EMBED}" COPYONLY)
+configure_file("${CMAKE_CURRENT_LIST_DIR}/i18n/zh-tw.json" "${I18N_ZH_TW_EMBED}" COPYONLY)
+target_add_binary_data(${COMPONENT_LIB} "${I18N_ZH_CN_EMBED}" TEXT)
+target_add_binary_data(${COMPONENT_LIB} "${I18N_ZH_TW_EMBED}" TEXT)
 
 # ESP-Hosted (P4 + C6 coprocessor) is only used by panel4 / panel10.
 # panels3 (ESP32-S3) has native Wi-Fi and must not pull in the hosted stack.

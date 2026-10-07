@@ -523,6 +523,11 @@ Memory, after the task stacks and the LVGL allocator were moved to PSRAM:
 
 ## Web editor sections
 
+On the Guition S3 build, **Live Display** mirrors the actual LCD pixels and provides optional
+remote mouse/touch control and native-resolution PNG download. Physical touch has priority.
+The feature is modular and can be disabled with `CONFIG_APP_REMOTE_DISPLAY`.
+See [Live Display usage, architecture and validation](REMOTE_DISPLAY.md).
+
 The editor has a **Layout** tab and a **Settings** tab with 15 sections:
 
 Wi-Fi · Home Assistant · Time (clock format & style) · Display & screensaver ·

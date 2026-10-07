@@ -20,7 +20,7 @@ if(NOT CMAKE_BUILD_EARLY_EXPANSION)
     idf_build_get_property(python PYTHON)
 
     set(WEBUI_GZ_ASSETS "")
-    foreach(webui_asset "index.html" "app.js" "styles.css")
+    foreach(webui_asset "index.html" "app.js" "styles.css" "remote_display.js")
         set(webui_src "${WEBUI_WWW_DIR}/${webui_asset}")
         set(webui_gz "${WEBUI_GZ_DIR}/${webui_asset}.gz")
         add_custom_command(

@@ -3,6 +3,7 @@
  */
 #include "api/http_server.h"
 #include "api/http_guard.h"
+#include "api/api_remote_display.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -22,6 +23,8 @@ extern const uint8_t _binary_app_js_gz_start[] asm("_binary_app_js_gz_start");
 extern const uint8_t _binary_app_js_gz_end[] asm("_binary_app_js_gz_end");
 extern const uint8_t _binary_styles_css_gz_start[] asm("_binary_styles_css_gz_start");
 extern const uint8_t _binary_styles_css_gz_end[] asm("_binary_styles_css_gz_end");
+extern const uint8_t _binary_remote_display_js_gz_start[] asm("_binary_remote_display_js_gz_start");
+extern const uint8_t _binary_remote_display_js_gz_end[] asm("_binary_remote_display_js_gz_end");
 
 static const char *s_plain_client_index_html =
     "<!doctype html><html><head><meta charset=\"utf-8\"><title>BETTA Editor</title>"
@@ -91,6 +94,12 @@ static esp_err_t styles_css_get_handler_impl(httpd_req_t *req)
     return send_gzip_asset(req, _binary_styles_css_gz_start, _binary_styles_css_gz_end, "text/css", false);
 }
 
+static esp_err_t remote_js_get_handler(httpd_req_t *req)
+{
+    return send_gzip_asset(req, _binary_remote_display_js_gz_start, _binary_remote_display_js_gz_end,
+                           "application/javascript", false);
+}
+
 static esp_err_t favicon_get_handler_impl(httpd_req_t *req)
 {
     httpd_resp_set_type(req, "image/x-icon");
@@ -139,7 +148,7 @@ esp_err_t http_server_start(void)
     }
     cfg.task_priority = http_task_prio;
     /* Must cover every route registered in api_routes.c plus the static/index handlers below. */
-    cfg.max_uri_handlers = 48;
+    cfg.max_uri_handlers = 56;
 #if defined(CONFIG_APP_PANEL_VARIANT_S3_480)
     cfg.max_open_sockets = 4;
 #else
@@ -193,6 +202,10 @@ esp_err_t http_server_start(void)
     ESP_RETURN_ON_ERROR(httpd_register_uri_handler(s_server, &styles_css_uri), TAG_HTTP, "register /styles.css");
     ESP_RETURN_ON_ERROR(httpd_register_uri_handler(s_server, &favicon_uri), TAG_HTTP, "register /favicon.ico");
     ESP_RETURN_ON_ERROR(api_routes_register(s_server), TAG_HTTP, "register api routes");
+    httpd_uri_t remote_js = {.uri = "/remote_display.js", .method = HTTP_GET, .handler = remote_js_get_handler};
+    esp_err_t remote_err = httpd_register_uri_handler(s_server, &remote_js);
+    if (remote_err == ESP_OK) remote_err = api_remote_display_register(s_server);
+    if (remote_err != ESP_OK) ESP_LOGW(TAG_HTTP, "Live display routes unavailable: %s", esp_err_to_name(remote_err));
 
     ESP_LOGI(TAG_HTTP, "HTTP server listening on port %d", APP_HTTP_PORT);
     return ESP_OK;

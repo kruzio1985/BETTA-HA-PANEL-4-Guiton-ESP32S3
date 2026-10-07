@@ -36,6 +36,7 @@
 #include "ui/ui_boot_splash.h"
 #include "ui/ui_i18n.h"
 #include "ui/ui_runtime.h"
+#include "ui/ui_remote_display.h"
 #include "ui/ui_screen_saver.h"
 #include "ui/ui_theme_router.h"
 #include "ui/theme/theme_store.h"
@@ -298,6 +299,12 @@ void app_main(void)
         ESP_ERROR_CHECK(ui_runtime_reload_layout());
         ESP_ERROR_CHECK(ui_runtime_start());
         ui_boot_splash_hide();
+#if CONFIG_APP_REMOTE_DISPLAY
+        esp_err_t remote_err = ui_remote_display_init();
+        if (remote_err != ESP_OK) {
+            ESP_LOGW(TAG_DISPLAY, "Live display unavailable: %s", esp_err_to_name(remote_err));
+        }
+#endif
 
         /* From here on the screensaver frame follows the microSD card: it is
          * moved onto a card that is inserted and copied back to internal flash

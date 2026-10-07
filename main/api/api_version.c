@@ -30,6 +30,11 @@ esp_err_t api_version_get_handler(httpd_req_t *req)
     cJSON_AddStringToObject(root, "name", APP_NAME);
     cJSON_AddStringToObject(root, "project", project_name);
     cJSON_AddStringToObject(root, "version", version);
+#if CONFIG_APP_REMOTE_DISPLAY
+    cJSON_AddBoolToObject(root, "remote_display", true);
+#else
+    cJSON_AddBoolToObject(root, "remote_display", false);
+#endif
     /* Panel geometry for the web editor canvas (px) - lets the same
      * app.js scale itself for both the 4" 720x720 and 10.1" 1280x800
      * variants without a separate build. */

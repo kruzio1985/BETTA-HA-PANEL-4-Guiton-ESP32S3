@@ -66,6 +66,7 @@
       <div class="mode-tabs">
         <button id="layoutTabBtn" class="btn tab active">Layout</button>
         <button id="settingsTabBtn" class="btn tab">Settings</button>
+        <button id="remoteTabBtn" class="btn tab hidden">Live Display</button>
       </div>
 
       <div id="layoutPane" class="pane">
@@ -698,9 +699,23 @@
             <label><span id="settingsNtpServerLabel">NTP Server</span>
               <input id="settingsNtpServer" type="text" placeholder="pool.ntp.org" maxlength="127" />
             </label>
-            <label><span id="settingsTimezoneLabel">Timezone (POSIX TZ)</span>
-              <input id="settingsTimezone" type="text" placeholder="CET-1CEST,M3.5.0/2,M10.5.0/3" maxlength="127" />
-            </label>
+            <div class="timezone-field">
+              <label id="settingsTimezoneLabel" for="settingsTimezoneSearch">Timezone</label>
+              <input id="settingsTimezone" type="hidden" />
+              <div id="settingsTimezonePicker" class="timezone-picker">
+                <div class="timezone-control">
+                  <input id="settingsTimezoneSearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="settingsTimezoneOptions" aria-describedby="settingsTimezoneHint" autocomplete="off" spellcheck="false" placeholder="Search timezone…" />
+                  <button id="settingsTimezoneToggle" class="btn" type="button" aria-label="Show timezones" aria-controls="settingsTimezoneOptions" aria-expanded="false">▾</button>
+                </div>
+                <div id="settingsTimezoneOptions" class="timezone-options" role="listbox" aria-labelledby="settingsTimezoneLabel" hidden></div>
+              </div>
+              <div id="settingsTimezoneHint" class="meta"></div>
+            </div>
+            <div class="timezone-clock">
+              <span id="settingsLocalTimeLabel">Current local time</span>
+              <output id="settingsLocalTime">—</output>
+              <span id="settingsActiveTimezone" class="meta"></span>
+            </div>
             <div id="settingsTimeInfo" class="meta"></div>
           </div>
         </section>
@@ -1200,6 +1215,18 @@
         <button type="button" class="ha-diagnostics-banner__close" id="haDiagnosticsDismiss" aria-label="Dismiss">&times;</button>
       </div>
       <div class="workspace-body">
+        <section id="remotePane" class="remote-pane hidden">
+          <div class="row remote-toolbar">
+            <button id="remoteConnect" class="btn" type="button">Connect</button>
+            <button id="remoteDisconnect" class="btn" type="button">Disconnect</button>
+            <label class="row row-inline"><input id="remoteControl" type="checkbox" disabled /><span id="remoteControlLabel">Enable control</span></label>
+            <button id="remoteScreenshot" class="btn" type="button" disabled>Download PNG</button>
+            <label class="row row-inline"><input id="remoteActual" type="checkbox" /><span id="remoteActualLabel">Actual size</span></label>
+          </div>
+          <p id="remoteHint" class="meta">Local touch has priority. Viewing does not wake the display.</p>
+          <div class="remote-status"><span id="remoteStatus" role="status">Disconnected</span><time id="remoteFrameTime"></time></div>
+          <div class="remote-surface"><canvas id="remoteCanvas" width="480" height="480" aria-label="Live LCD display"></canvas></div>
+        </section>
         <div class="canvas-wrap">
           <div id="canvas" class="canvas"></div>
         </div>
@@ -1302,6 +1329,7 @@
   </datalist>
   <datalist id="energyEntityOptions"></datalist>
   <datalist id="musicEntityOptions"></datalist>
+  <script src="/remote_display.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
